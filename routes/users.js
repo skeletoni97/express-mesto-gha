@@ -1,5 +1,8 @@
 const router = require('express').Router();
+const mongoose = require('mongoose');
 const User = require('../models/user');
+
+const { ObjectId } = mongoose.Types;
 
 router.get('/', (req, res) => {
   User.find({})
@@ -8,7 +11,11 @@ router.get('/', (req, res) => {
 });
 
 router.get('/:userId', (req, res) => {
-  console.log(req.params)
+  console.log(req.params);
+  const { cardId } = req.params;
+  if (!ObjectId.isValid(cardId)) {
+    return res.status(400).send({ message: 'Передан несуществующий _id карточки' });
+  }
   User.findById(req.params.userId)
     .then((user) => {
       if (!user) {

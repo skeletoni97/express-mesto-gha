@@ -29,8 +29,11 @@ router.post('/', (req, res) => {
 
 // DELETE /cards/:cardId — удаляет карточку по идентификатору
 router.delete('/:cardId', (req, res) => {
-  console.log(req.params.cardId);
-  Card.findByIdAndRemove(req.params.cardId)
+  const { cardId } = req.params;
+  if (!ObjectId.isValid(cardId)) {
+    return res.status(400).send({ message: 'Передан некорректный _id карточки' });
+  }
+  Card.findByIdAndRemove(cardId)
     .then((card) => {
       if (!card) {
         return res.status(404).send({ message: 'Карточка с указанным _id не найдена.' });
