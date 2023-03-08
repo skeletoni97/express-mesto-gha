@@ -34,7 +34,7 @@ router.delete('/:cardId', (req, res) => {
       }
       return res.send({ data: card });
     })
-    .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
+    .catch((err) => res.status(500).send({ message: err.message }));
 });
 
 router.put('/:cardId/likes', (req, res) => {
@@ -51,7 +51,7 @@ router.put('/:cardId/likes', (req, res) => {
       const update = isLiked ? { $pull: { likes: userId } } : { $addToSet: { likes: userId } };
       const options = { new: true };
 
-      Card.findByIdAndUpdate(cardId, update, options)
+      return Card.findByIdAndUpdate(cardId, update, options)
         .then((updatedCard) => res.send(updatedCard))
         .catch(() => res.status(400).send({ message: 'Переданы некорректные данные для постановки/снятии лайка.' }));
     })

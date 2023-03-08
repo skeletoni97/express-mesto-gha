@@ -19,7 +19,7 @@ app.use(bodyParser.json());
 app.use(express.static(path.join((__dirname, 'public'))));
 app.use((req, res, next) => {
   req.user = {
-    _id: '6407a79620ecd0df2f82cb7d' // вставьте сюда _id созданного в предыдущем пункте пользователя
+    _id: '6407a79620ecd0df2f82cb7d',
   };
 
   next();
