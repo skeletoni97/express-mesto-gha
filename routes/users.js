@@ -13,7 +13,7 @@ router.get('/:userId', (req, res) => {
       if (!user) {
         return res.status(404).send({ message: 'Пользователь по указанному _id не найден.' });
       }
-      return res.send({ data: user });
+      res.send({ data: user });
     })
     .catch((err) => res.status(500).send({ message: err.message }));
 });
