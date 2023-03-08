@@ -6,24 +6,27 @@ const { ObjectId } = mongoose.Types;
 
 router.get('/', (req, res) => {
   User.find({})
-    .then((users) => res.send({ data: users }))
+    .then((users) => res.send(users))
     .catch((err) => res.status(500).send({ mmessage: err.message }));
 });
 
 router.get('/:userId', (req, res) => {
-  console.log(req.params);
-  const { cardId } = req.params;
-  if (!ObjectId.isValid(cardId)) {
-    return res.status(400).send({ message: 'Передан несуществующий _id карточки' });
-  }
-  User.findById(req.params.userId)
+  const { cardId } = req.params
+  console.log(req.params)
+  User.findById(cardId)
     .then((user) => {
       if (!user) {
+        console.log(user);
         return res.status(404).send({ message: 'Пользователь по указанному _id не найден.' });
       }
-      return res.send({ data: user });
+      return res.send(user);
     })
-    .catch((err) => res.status(500).send({ message: err.message }));
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        return res.status(400).send({ message: 'Переданы некорректные данные при обновлении профиля' });
+      }
+      return res.status(500).send({ message: err.message });
+    });
 });
 
 // сработает при POST-запросе на URL /films

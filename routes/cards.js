@@ -64,7 +64,12 @@ router.put('/:cardId/likes', (req, res) => {
         .then((updatedCard) => res.send(updatedCard))
         .catch(() => res.status(400).send({ message: 'Переданы некорректные данные для постановки/снятии лайка.' }));
     })
-    .catch((err) => res.status(500).send({ message: err.maassage }));
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        return res.status(400).send({ message: 'Переданы некорректные данные при обновлении профиля' });
+      }
+      res.status(500).send({ message: err.maassage });
+    });
 });
 
 module.exports = router;
