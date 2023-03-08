@@ -13,7 +13,7 @@ router.get('/:userId', (req, res) => {
       if (!user) {
         return res.status(404).send({ message: 'Пользователь по указанному _id не найден.' });
       }
-      res.send({ data: user });
+      return res.send({ data: user });
     })
     .catch((err) => res.status(500).send({ message: err.message }));
 });
@@ -24,7 +24,7 @@ router.post('/', (req, res) => {
   console.log(name, about, avatar);
   User.create({ name, about, avatar })
     .then((user) => res.send({ data: user }))
-    .catch(() => res.status(404).send({ message: 'Переданы некорректные данные при создании пользователя.' }));
+    .catch(() => res.status(400).send({ message: 'Переданы некорректные данные при создании пользователя.' }));
 });
 
 router.patch('/me', (req, res) => {

@@ -39,8 +39,7 @@ router.delete('/:cardId', (req, res) => {
 
 router.put('/:cardId/likes', (req, res) => {
   const userId = req.user._id;
-  const cardId = req.body._id;
-
+  const { cardId } = req.params;
   Card.findById(cardId)
     .then((card) => {
       if (!card) {
