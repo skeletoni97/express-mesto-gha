@@ -26,6 +26,10 @@ app.use((req, res, next) => {
 });
 app.use('/users', usersRouter);
 app.use('/cards', cardsRouter);
+app.use((req, res, next) => {
+  res.status(404).send({ message: 'Запрашиваемый ресурс не найден' });
+  next();
+});
 
 app.listen(PORT, () => {
   console.log('privet');

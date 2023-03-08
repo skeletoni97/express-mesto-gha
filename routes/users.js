@@ -8,7 +8,8 @@ router.get('/', (req, res) => {
 });
 
 router.get('/:userId', (req, res) => {
-  User.findById(req.user._id)
+  console.log(req.params)
+  User.findById(req.params.userId)
     .then((user) => {
       if (!user) {
         return res.status(404).send({ message: 'Пользователь по указанному _id не найден.' });
