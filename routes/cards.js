@@ -1,4 +1,7 @@
 const express = require('express');
+const mongoose = require('mongoose');
+
+const { ObjectId } = mongoose.Types;
 
 const router = express.Router();
 const Card = require('../models/card');
@@ -40,6 +43,10 @@ router.delete('/:cardId', (req, res) => {
 router.put('/:cardId/likes', (req, res) => {
   const userId = req.user._id;
   const { cardId } = req.params;
+  console.log(cardId);
+  if (!ObjectId.isValid(cardId)) {
+    return res.status(400).send({ message: 'Передан несуществующий _id карточки' });
+  }
   Card.findById(cardId)
     .then((card) => {
       if (!card) {
