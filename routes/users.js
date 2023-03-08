@@ -27,23 +27,22 @@ router.post('/', (req, res) => {
     .catch(() => res.status(404).send({ message: 'Переданы некорректные данные при создании пользователя.' }));
 });
 
-module.exports = router;
-
 router.patch('/me', (req, res) => {
   const userId = req.user._id;
   const updatedFields = req.body;
-  User.findByIdAndUpdate(userId, updatedFields, { new: true })
+  User.findByIdAndUpdate(userId, updatedFields, { new: true, runValidators: true })
     .then((user) => {
       if (!user) {
+        console.log(user);
         return res.status(404).send({ message: 'Пользователь с указанным _id не найден' });
       }
-      res.send(user);
+      return res.send(user);
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
         return res.status(400).send({ message: 'Переданы некорректные данные при обновлении профиля' });
       }
-      res.status(500).send({ message: err.message });
+      return res.status(500).send({ message: err.message });
     });
 });
 
@@ -51,7 +50,20 @@ router.patch('/me/avatar', (req, res) => {
   const userId = req.user._id;
   const { avatar } = req.body;
 
-  User.findByIdAndUpdate(userId, { avatar }, { new: true })
-    .then((user) => res.send(user))
-    .catch((err) => res.status(400).send({ message: err.message }));
+  User.findByIdAndUpdate(userId, { avatar }, { new: true, runValidators: true })
+    .then((user) => {
+      if (!user) {
+        console.log(user);
+        return res.status(404).send({ message: 'Пользователь с указанным _id не найден' });
+      }
+      return res.send(user);
+    })
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        return res.status(400).send({ message: 'Переданы некорректные данные при обновлении аватара.' });
+      }
+      return res.status(500).send({ message: err.message });
+    });
 });
+
+module.exports = router;
