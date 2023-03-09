@@ -1,80 +1,14 @@
-const router = require('express').Router();
-const mongoose = require('mongoose');
-const User = require('../models/user');
+const express = require('express');
 
-const { ObjectId } = mongoose.Types;
+const router = express.Router();
 
-router.get('/', (req, res) => {
-  User.find({})
-    .then((users) => res.send(users))
-    .catch((err) => res.status(500).send({ mmessage: err.message }));
-});
+const { getUsers, getUsersId, postUsers } = require('../controllers/users');
+const { patchUsersMe, patchUsersMeAvatar } = require('../controllers/users');
 
-router.get('/:userId', (req, res) => {
-  const { cardId } = req.params
-  console.log(req.params)
-  User.findById(cardId)
-    .then((user) => {
-      if (!user) {
-        console.log(user);
-        return res.status(404).send({ message: 'Пользователь по указанному _id не найден.' });
-      }
-      return res.send(user);
-    })
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        return res.status(400).send({ message: 'Переданы некорректные данные при обновлении профиля' });
-      }
-      return res.status(500).send({ message: err.message });
-    });
-});
-
-// сработает при POST-запросе на URL /films
-router.post('/', (req, res) => {
-  const { name, about, avatar } = req.body;
-  console.log(name, about, avatar);
-  User.create({ name, about, avatar })
-    .then((user) => res.send({ data: user }))
-    .catch(() => res.status(400).send({ message: 'Переданы некорректные данные при создании пользователя.' }));
-});
-
-router.patch('/me', (req, res) => {
-  const userId = req.user._id;
-  const updatedFields = req.body;
-  User.findByIdAndUpdate(userId, updatedFields, { new: true, runValidators: true })
-    .then((user) => {
-      if (!user) {
-        console.log(user);
-        return res.status(404).send({ message: 'Пользователь с указанным _id не найден' });
-      }
-      return res.send(user);
-    })
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        return res.status(400).send({ message: 'Переданы некорректные данные при обновлении профиля' });
-      }
-      return res.status(500).send({ message: err.message });
-    });
-});
-
-router.patch('/me/avatar', (req, res) => {
-  const userId = req.user._id;
-  const { avatar } = req.body;
-
-  User.findByIdAndUpdate(userId, { avatar }, { new: true, runValidators: true })
-    .then((user) => {
-      if (!user) {
-        console.log(user);
-        return res.status(404).send({ message: 'Пользователь с указанным _id не найден' });
-      }
-      return res.send(user);
-    })
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        return res.status(400).send({ message: 'Переданы некорректные данные при обновлении аватара.' });
-      }
-      return res.status(500).send({ message: err.message });
-    });
-});
+router.get('/', getUsers);
+router.get('/:userId', getUsersId);
+router.get('/:userId', postUsers);
+router.get('/me', patchUsersMe);
+router.get('/me/avatar', patchUsersMeAvatar);
 
 module.exports = router;
