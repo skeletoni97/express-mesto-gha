@@ -7,8 +7,8 @@ const { patchUsersMe, patchUsersMeAvatar } = require('../controllers/users');
 
 router.get('/', getUsers);
 router.get('/:userId', getUsersId);
-router.get('/:userId', postUsers);
-router.get('/me', patchUsersMe);
-router.get('/me/avatar', patchUsersMeAvatar);
+router.post('/', postUsers);
+router.patch('/me', patchUsersMe);
+router.patch('/me/avatar', patchUsersMeAvatar);
 
 module.exports = router;
