@@ -1,3 +1,7 @@
+const mongoose = require('mongoose');
+
+const { ObjectId } = mongoose.Types;
+
 const User = require('../models/user');
 
 module.exports.getUsers = (req, res) => {
@@ -7,10 +11,12 @@ module.exports.getUsers = (req, res) => {
 };
 
 module.exports.getUsersId = (req, res) => {
-  User.findById(req.params.userId)
+  if (!ObjectId.isValid(req.params.userId)) {
+    return res.status(400).send({ message: 'Передан несуществующий _id карточки' });
+  }
+  return User.findById(req.params.userId)
     .then((user) => {
       if (!user) {
-        console.log(user);
         return res.status(404).send({ message: 'Пользователь по указанному _id не найден.' });
       }
       return res.send(user);
