@@ -21,12 +21,7 @@ module.exports.getUsersId = (req, res) => {
       }
       return res.send(user);
     })
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        return res.status(400).send({ message: 'Переданы некорректные данные при обновлении профиля' });
-      }
-      return res.status(500).send({ message: err.message });
-    });
+    .catch((err) => res.status(500).send({ mmessage: err.message }));
 };
 
 module.exports.postUsers = (req, res) => {

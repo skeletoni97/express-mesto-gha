@@ -8,7 +8,7 @@ module.exports.getCards = (req, res) => {
   Card.find({})
     .populate('owner')
     .then((cards) => res.send({ data: cards }))
-    .catch((err) => res.status(500).send({ message: err.message }))
+    .catch((err) => res.status(500).send({ message: err.message }));
 };
 
 module.exports.postCards = (req, res) => {
@@ -27,8 +27,8 @@ module.exports.deleteCards = (req, res) => {
   const { cardId } = req.params;
   if (!ObjectId.isValid(cardId)) {
     return res.status(400).send({ message: 'Передан некорректный _id карточки' });
-  } else {
-  Card.findByIdAndRemove(cardId)
+  }
+  return Card.findByIdAndRemove(cardId)
     .then((card) => {
       if (!card) {
         return res.status(404).send({ message: 'Карточка с указанным _id не найдена.' });
@@ -36,7 +36,6 @@ module.exports.deleteCards = (req, res) => {
       return res.send({ data: card });
     })
     .catch((err) => res.status(500).send({ message: err.message }));
-  }
 };
 
 module.exports.putCardsLike = (req, res) => {
@@ -44,9 +43,9 @@ module.exports.putCardsLike = (req, res) => {
   const { cardId } = req.params;
   console.log(cardId);
   if (!ObjectId.isValid(cardId)) {
-    return res.status(400).send({ message: 'Передан несуществующий _id карточки' });
+    return res.status(400).send({ message: 'Передан некорректный _id карточки' });
   }
-  Card.findById(cardId)
+  return Card.findById(cardId)
     .then((card) => {
       if (!card) {
         return res.status(404).send({ message: 'Передан несуществующий _id карточки.' });
@@ -60,10 +59,5 @@ module.exports.putCardsLike = (req, res) => {
         .then((updatedCard) => res.send(updatedCard))
         .catch(() => res.status(400).send({ message: 'Переданы некорректные данные для постановки/снятии лайка.' }));
     })
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        return res.status(400).send({ message: 'Переданы некорректные данные при обновлении профиля' });
-      }
-      return res.status(500).send({ message: err.maassage });
-    });
+    .catch((err) => res.status(500).send({ message: err.message }));
 };
