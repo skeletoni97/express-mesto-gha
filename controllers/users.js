@@ -7,25 +7,17 @@ module.exports.getUsers = (req, res) => {
 };
 
 module.exports.getUsersId = (req, res) => {
-  const { cardId } = req.params;
-  console.log(req.params);
-  User.findById(cardId)
+  User.findById(req.params.userId)
     .then((user) => {
       if (!user) {
         console.log(user);
-        return res
-          .status(404)
-          .send({ message: 'Пользователь по указанному _id не найден.' });
+        return res.status(404).send({ message: 'Пользователь по указанному _id не найден.' });
       }
       return res.send(user);
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res
-          .status(400)
-          .send({
-            message: 'Переданы некорректные данные при обновлении профиля',
-          });
+        return res.status(400).send({ message: 'Переданы некорректные данные при обновлении профиля' });
       }
       return res.status(500).send({ message: err.message });
     });
