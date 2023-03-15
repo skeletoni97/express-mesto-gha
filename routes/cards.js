@@ -1,6 +1,6 @@
 const express = require('express');
 const { getCards, postCards, deleteCards } = require('../controllers/cards');
-const { putCardsLike } = require('../controllers/cards');
+const { putCardsLike, deleteCardsLike } = require('../controllers/cards');
 
 const router = express.Router();
 // GET /cards — возвращает все карточки
@@ -12,5 +12,5 @@ router.post('/', postCards);
 router.delete('/:cardId', deleteCards);
 
 router.put('/:cardId/likes', putCardsLike);
-router.delete('/:cardId/likes', putCardsLike);
+router.delete('/:cardId/likes', deleteCardsLike);
 module.exports = router;

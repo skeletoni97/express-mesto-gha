@@ -26,19 +26,22 @@ module.exports.getUsersId = (req, res) => {
 
 module.exports.postUsers = (req, res) => {
   const { name, about, avatar } = req.body;
-  console.log(name, about, avatar);
   User.create({ name, about, avatar })
     .then((user) => res.send({ data: user }))
-    .catch(() => res.status(400).send({ message: 'Переданы некорректные данные при создании пользователя.' }));
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        return res.status(400).send({ message: 'Переданы некорректные данные при создании пользователя' });
+      }
+      return res.status(500).send({ message: err.message });
+    });
 };
 
 module.exports.patchUsersMe = (req, res) => {
   const userId = req.user._id;
-  const updatedFields = req.body;
-  User.findByIdAndUpdate(userId, updatedFields, { new: true, runValidators: true })
+  const { about, name } = req.body;
+  User.findByIdAndUpdate(userId, about, name, { new: true, runValidators: true })
     .then((user) => {
       if (!user) {
-        console.log(user);
         return res.status(404).send({ message: 'Пользователь с указанным _id не найден' });
       }
       return res.send(user);
@@ -58,7 +61,6 @@ module.exports.patchUsersMeAvatar = (req, res) => {
   User.findByIdAndUpdate(userId, { avatar }, { new: true, runValidators: true })
     .then((user) => {
       if (!user) {
-        console.log(user);
         return res.status(404).send({ message: 'Пользователь с указанным _id не найден' });
       }
       return res.send(user);
