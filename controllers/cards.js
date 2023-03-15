@@ -26,7 +26,7 @@ module.exports.postCards = (req, res) => {
 module.exports.deleteCards = (req, res) => {
   const { cardId } = req.params;
   if (!ObjectId.isValid(cardId)) {
-    return res.status(400).send({ message: 'Передан некорректный _id карточки' })
+    return res.status(400).send({ message: 'Передан некорректный _id карточки' });
   }
   return Card.findByIdAndRemove(cardId)
     .then((card) => {
