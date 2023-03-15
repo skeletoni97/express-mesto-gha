@@ -39,7 +39,7 @@ module.exports.postUsers = (req, res) => {
 module.exports.patchUsersMe = (req, res) => {
   const userId = req.user._id;
   const { about, name } = req.body;
-  User.findByIdAndUpdate(userId, about, name, { new: true, runValidators: true })
+  User.findByIdAndUpdate(userId, { about, name }, { new: true, runValidators: true })
     .then((user) => {
       if (!user) {
         return res.status(404).send({ message: 'Пользователь с указанным _id не найден' });
