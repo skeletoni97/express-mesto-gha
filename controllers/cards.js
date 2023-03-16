@@ -66,9 +66,7 @@ module.exports.deleteCards = (req, res) => {
 module.exports.putCardsLike = (req, res) => {
   const userId = req.user._id;
   const { cardId } = req.params;
-  // if (!ObjectId.isValid(cardId)) {
-  //   return res.status(400).send({ message: 'Передан некорректный _id карточки' });
-  // }
+
   return Card.findById(cardId)
     .then((card) => {
       if (!card) {
@@ -78,17 +76,20 @@ module.exports.putCardsLike = (req, res) => {
         .then((updatedCard) => res.send(updatedCard))
         .catch(() => res.status(400).send({ message: 'Переданы некорректные данные для постановки/снятии лайка.' }));
     })
-    .catch((err) => res.status(500).send({ message: err.message }));
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        console.log('card');
+        return res.status(400).send({ message: 'Передан некорректный _id карточки' });
+      }
+      return res.status(500).send({ message: err.message });
+    });
 };
 
 module.exports.deleteCardsLike = (req, res) => {
   const userId = req.user._id;
   const { cardId } = req.params;
-  // if (!ObjectId.isValid(cardId)) {
-  //   return res.status(400).send({ message: 'Передан некорректный _id карточки' });
-  // }
-  return Card.findById(cardId)
 
+  return Card.findById(cardId)
     .then((card) => {
       console.log(card);
       if (!card) {
@@ -98,5 +99,11 @@ module.exports.deleteCardsLike = (req, res) => {
         .then((updatedCard) => res.send(updatedCard))
         .catch(() => res.status(400).send({ message: 'Переданы некорректные данные для постановки/снятии лайка.' }));
     })
-    .catch((err) => res.status(500).send({ message: err.message }));
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        console.log('card');
+        return res.status(400).send({ message: 'Передан некорректный _id карточки' });
+      }
+      return res.status(500).send({ message: err.message });
+    });
 };
