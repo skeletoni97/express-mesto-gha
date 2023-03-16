@@ -78,7 +78,6 @@ module.exports.putCardsLike = (req, res) => {
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        console.log('card');
         return res.status(400).send({ message: 'Передан некорректный _id карточки' });
       }
       return res.status(500).send({ message: err.message });
@@ -91,7 +90,6 @@ module.exports.deleteCardsLike = (req, res) => {
 
   return Card.findById(cardId)
     .then((card) => {
-      console.log(card);
       if (!card) {
         return res.status(404).send({ message: 'Передан несуществующий _id карточки.' });
       }
@@ -101,7 +99,6 @@ module.exports.deleteCardsLike = (req, res) => {
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        console.log('card');
         return res.status(400).send({ message: 'Передан некорректный _id карточки' });
       }
       return res.status(500).send({ message: err.message });
