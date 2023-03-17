@@ -74,7 +74,7 @@ module.exports.putCardsLike = (req, res) => {
       }
       return Card.findByIdAndUpdate(cardId, { $addToSet: { likes: userId } }, { new: true })
         .then((updatedCard) => res.send(updatedCard))
-        .catch(() => res.status(400).send({ message: 'Переданы некорректные данные для постановки/снятии лайка.' }));
+        .catch((err) => res.status(500).send({ message: err.message }));
     })
     .catch((err) => {
       if (err.name === 'CastError') {
@@ -95,7 +95,7 @@ module.exports.deleteCardsLike = (req, res) => {
       }
       return Card.findByIdAndUpdate(cardId, { $pull: { likes: userId } }, { new: true })
         .then((updatedCard) => res.send(updatedCard))
-        .catch(() => res.status(400).send({ message: 'Переданы некорректные данные для постановки/снятии лайка.' }));
+        .catch((err) => res.status(500).send({ message: err.message }));
     })
     .catch((err) => {
       if (err.name === 'CastError') {
