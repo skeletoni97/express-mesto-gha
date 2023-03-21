@@ -1,8 +1,64 @@
 const mongoose = require('mongoose');
 
+const bcrypt = require('bcryptjs');
+
+const jwt = require('jsonwebtoken');
+
 const { ObjectId } = mongoose.Types;
 
 const User = require('../models/user');
+
+module.exports.getUsersMe = (req, res) => {
+  User.find({ _id: req.user._id })
+    .then((users) => res.send(users))
+    .catch((err) => res.status(500).send({ mmessage: err.message }));
+};
+
+module.exports.login = (req, res) => {
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    return res.status(400).send({ message: 'Электронная почта и пароль обязательны' });
+  }
+
+  User.findOne({ email })
+    .then((user) => {
+      if (!user) {
+        console.log(user);
+        return res.status(401).send({ message: 'Неправильные почта ' });
+      }
+      console.log(password, user.password);
+
+      bcrypt.compare(password, user.password)
+        .then((matched) => {
+          if (!matched) {
+            console.log(matched);
+            return res.status(401).send({ message: 'Неправильные  пароль' });
+          }
+
+          const token = jwt.sign({ _id: user._id }, 'some-secret-key', { expiresIn: '7d' });
+          res.cookie('jwt', token, { httpOnly: true, sameSite: true });
+          res.send({ user, token });
+        });
+    })
+    .catch((err) => res.status(500).send({ message: `An error occurred: ${err.message}` }));
+};
+
+module.exports.createUser = (req, res) => {
+  const { name, about, avatar } = req.body;
+  bcrypt.hash(req.body.password, 10)
+    .then((hash) => User.create({ name, about, avatar, email: req.body.email, password: hash }))
+    .then((user) => res.send({ data: user }))
+    .catch((err) => {
+      // if (err.code === 11000) { проверить email относиться к валидации
+      //   return res.status(409).send({ message: 'Переданы некорректные данные при создании пользователя' });
+      // }
+      if (err.name === 'ValidationError') {
+        return res.status(400).send({ message: 'Переданы некорректные данные при создании пользователя' });
+      }
+      return res.status(500).send({ message: err.message });
+    });
+};
 
 module.exports.getUsers = (req, res) => {
   User.find({})
@@ -22,18 +78,6 @@ module.exports.getUsersId = (req, res) => {
       return res.send(user);
     })
     .catch((err) => res.status(500).send({ mmessage: err.message }));
-};
-
-module.exports.postUsers = (req, res) => {
-  const { name, about, avatar } = req.body;
-  User.create({ name, about, avatar })
-    .then((user) => res.send({ data: user }))
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        return res.status(400).send({ message: 'Переданы некорректные данные при создании пользователя' });
-      }
-      return res.status(500).send({ message: err.message });
-    });
 };
 
 module.exports.patchUsersMe = (req, res) => {

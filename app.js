@@ -7,6 +7,9 @@ const mongoose = require('mongoose');
 const usersRouter = require('./routes/users');
 const cardsRouter = require('./routes/cards');
 
+const { login, createUser } = require('./controllers/users');
+const auth = require('./middlewares/auth');
+
 const { PORT = 3000 } = process.env;
 
 mongoose.connect('mongodb://127.0.0.1:27017/mestodb', {
@@ -17,15 +20,18 @@ mongoose.connect('mongodb://127.0.0.1:27017/mestodb', {
 const app = express();
 app.use(bodyParser.json());
 // app.use(express.static(path.join((__dirname, 'public'))));
-app.use((req, res, next) => {
-  req.user = {
-    _id: '6407a79620ecd0df2f82cb7d',
-  };
+// app.use((req, res, next) => {
+//   req.user = {
+//     _id: '641a15bb5bec531f22940f2f',
+//   };
 
-  next();
-});
-app.use('/users', usersRouter);
-app.use('/cards', cardsRouter);
+//   next();
+// });
+
+app.post('/signin', login);
+app.post('/signup', createUser);
+app.use('/users', auth, usersRouter);
+app.use('/cards', auth, cardsRouter);
 app.use((req, res, next) => {
   res.status(404).send({ message: 'Запрашиваемый ресурс не найден' });
   next();
