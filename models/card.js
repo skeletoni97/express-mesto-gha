@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-
+const { celebrate, Joi } = require('celebrate');
 const cardSchema = new mongoose.Schema({
   name: {
     type: String,

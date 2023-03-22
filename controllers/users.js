@@ -21,7 +21,7 @@ module.exports.login = (req, res) => {
     return res.status(400).send({ message: 'Электронная почта и пароль обязательны' });
   }
 
-  User.findOne({ email })
+  User.findOne({ email }).select('+password')
     .then((user) => {
       if (!user) {
         console.log(user);
@@ -50,9 +50,10 @@ module.exports.createUser = (req, res) => {
     .then((hash) => User.create({ name, about, avatar, email: req.body.email, password: hash }))
     .then((user) => res.send({ data: user }))
     .catch((err) => {
-      // if (err.code === 11000) { проверить email относиться к валидации
-      //   return res.status(409).send({ message: 'Переданы некорректные данные при создании пользователя' });
-      // }
+      console.log(err.name);
+      if (err.code === 11000) {
+        return res.status(409).send({ message: 'hПереданы некорректные данные при создании пользователя' });
+      }
       if (err.name === 'ValidationError') {
         return res.status(400).send({ message: 'Переданы некорректные данные при создании пользователя' });
       }
