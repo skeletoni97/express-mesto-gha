@@ -32,14 +32,19 @@ app.post('/signin', celebrate({
   body: Joi.object().keys({
     email: Joi.string().email().required(),
     password: Joi.string().min(8).required(),
-  }).unknown(true),
+  }),
 }), login);
+
 app.post('/signup', celebrate({
   body: Joi.object().keys({
     email: Joi.string().email().required(),
     password: Joi.string().min(8).required(),
-  }).unknown(true),
+    name: Joi.string().min(2).max(30),
+    about: Joi.string().min(2).max(30),
+    avatar: Joi.string(),
+  }),
 }), createUser);
+
 app.use('/users', auth, usersRouter);
 app.use('/cards', auth, cardsRouter);
 app.use((req, res, next) => {
