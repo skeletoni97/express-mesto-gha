@@ -10,6 +10,7 @@ const User = require('../models/user');
 
 module.exports.getUsersMe = (req, res) => {
   User.find({ _id: req.user._id })
+    .orFail(() => res.status(404).send({ message: 'По переданному id отсутствуют данные.' }))
     .then((users) => res.send(users))
     .catch((err) => res.status(500).send({ mmessage: err.message }));
 };
