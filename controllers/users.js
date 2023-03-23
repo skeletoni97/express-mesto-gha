@@ -25,20 +25,19 @@ module.exports.login = (req, res) => {
   return User.findOne({ email }).select('+password')
     .then((user) => {
       if (!user) {
-        return res.status(401).send({ message: 'Неправильные почта ' });
+        return res.status(401).send({ message: 'Неправильные пароль или почта ' });
       }
       return bcrypt.compare(password, user.password)
         .then((matched) => {
           if (!matched) {
-            return res.status(401).send({ message: 'Неправильные  пароль' });
+            return res.status(401).send({ message: 'Неправильные пароль или почта' });
           }
-
           const token = jwt.sign({ _id: user._id }, 'some-secret-key', { expiresIn: '7d' });
           res.cookie('jwt', token, { httpOnly: true, sameSite: true });
           return res.send({ user, token });
         });
     })
-    .catch((err) => res.status(500).send({ message: `An error occurred: ${err.message}` }));
+    .catch((err) => res.status(500).send({ mmessage: err.message }));
 };
 
 module.exports.createUser = (req, res) => {
@@ -56,9 +55,8 @@ module.exports.createUser = (req, res) => {
       },
     }))
     .catch((err) => {
-      console.log(err.name);
       if (err.code === 11000) {
-        return res.status(409).send({ message: 'hПереданы некорректные данные при создании пользователя' });
+        return res.status(409).send({ message: 'Переданы некорректные данные при создании пользователя' });
       }
       if (err.name === 'ValidationError') {
         return res.status(400).send({ message: 'Переданы некорректные данные при создании пользователя' });

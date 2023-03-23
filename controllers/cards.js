@@ -1,7 +1,6 @@
 const mongoose = require('mongoose');
 
 const { ObjectId } = mongoose.Types;
-
 const Card = require('../models/card');
 
 module.exports.getCards = (req, res) => {

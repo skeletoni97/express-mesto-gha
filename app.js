@@ -50,22 +50,6 @@ app.use((err, req, res, next) => {
   next();
 });
 
-// app.use((err, req, res, next) => {
-//   let details;
-
-//   if (isCelebrateError(err)) {
-//     details = new BadRequestError(err.details.get('body'));
-//   } else {
-//     details = err;
-//   }
-
-//   const { statusCode = 500, message = 'На сервере произошла ошибка' } = details;
-//   res.status(statusCode).send({
-//     message,
-//   });
-//   next();
-// });
-
 app.listen(PORT, () => {
   console.log('privet');
 });
