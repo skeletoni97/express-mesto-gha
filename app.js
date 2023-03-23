@@ -2,7 +2,7 @@ const express = require('express');
 // const path = require('path');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
-const { celebrate, Joi, isCelebrateError, errors } = require('celebrate');
+const { celebrate, Joi, errors } = require('celebrate');
 const usersRouter = require('./routes/users');
 const cardsRouter = require('./routes/cards');
 
@@ -47,7 +47,7 @@ app.use(errors());
 
 app.use((err, req, res, next) => {
   res.status(500).send({ message: 'На сервере произошла ошибка' });
-  next()
+  next();
 });
 
 // app.use((err, req, res, next) => {

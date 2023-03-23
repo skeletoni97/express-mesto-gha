@@ -9,7 +9,7 @@ const { ObjectId } = mongoose.Types;
 const User = require('../models/user');
 
 module.exports.getUsersMe = (req, res) => {
-  User.find({ _id: req.user._id })
+  User.findById({ _id: req.user._id })
     .orFail(() => res.status(404).send({ message: 'По переданному id отсутствуют данные.' }))
     .then((users) => res.send(users))
     .catch((err) => res.status(500).send({ mmessage: err.message }));
@@ -25,21 +25,17 @@ module.exports.login = (req, res) => {
   User.findOne({ email }).select('+password')
     .then((user) => {
       if (!user) {
-        console.log(user);
         return res.status(401).send({ message: 'Неправильные почта ' });
       }
-      console.log(password, user.password);
-
       bcrypt.compare(password, user.password)
         .then((matched) => {
           if (!matched) {
-            console.log(matched);
             return res.status(401).send({ message: 'Неправильные  пароль' });
           }
 
           const token = jwt.sign({ _id: user._id }, 'some-secret-key', { expiresIn: '7d' });
           res.cookie('jwt', token, { httpOnly: true, sameSite: true });
-          res.send({ user, token });
+          return res.send({ user, token });
         });
     })
     .catch((err) => res.status(500).send({ message: `An error occurred: ${err.message}` }));
@@ -48,12 +44,17 @@ module.exports.login = (req, res) => {
 module.exports.createUser = (req, res) => {
   const { name, about, avatar } = req.body;
   bcrypt.hash(req.body.password, 10)
-    .then((hash) => User.create({ name, about, avatar, email: req.body.email, password: hash }))
-    .then((user) => res.send({ data: {
-      name: user.name,
-      about: user.about,
-      avatar: user.avatar,
-      email: user.email } }))
+    .then((hash) => User.create({
+      name, about, avatar, email: req.body.email, password: hash,
+    }))
+    .then((user) => res.send({
+      data: {
+        name: user.name,
+        about: user.about,
+        avatar: user.avatar,
+        email: user.email,
+      },
+    }))
     .catch((err) => {
       console.log(err.name);
       if (err.code === 11000) {
