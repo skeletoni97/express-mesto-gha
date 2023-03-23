@@ -1,9 +1,8 @@
 const express = require('express');
 // const path = require('path');
 const bodyParser = require('body-parser');
-
 const mongoose = require('mongoose');
-const { celebrate, Joi } = require('celebrate');
+const { celebrate, Joi, isCelebrateError, errors } = require('celebrate');
 const usersRouter = require('./routes/users');
 const cardsRouter = require('./routes/cards');
 
@@ -19,20 +18,12 @@ mongoose.connect('mongodb://127.0.0.1:27017/mestodb', {
 
 const app = express();
 app.use(bodyParser.json());
-// app.use(express.static(path.join((__dirname, 'public'))));
-// app.use((req, res, next) => {
-//   req.user = {
-//     _id: '641a15bb5bec531f22940f2f',
-//   };
-
-//   next();
-// });
 
 app.post('/signin', celebrate({
   body: Joi.object().keys({
     email: Joi.string().email().required(),
     password: Joi.string().min(8).required(),
-  }),
+  }).unknown(true),
 }), login);
 
 app.post('/signup', celebrate({
@@ -42,7 +33,7 @@ app.post('/signup', celebrate({
     name: Joi.string().min(2).max(30),
     about: Joi.string().min(2).max(30),
     avatar: Joi.string(),
-  }),
+  }).unknown(true),
 }), createUser);
 
 app.use('/users', auth, usersRouter);
@@ -51,6 +42,29 @@ app.use((req, res, next) => {
   res.status(404).send({ message: 'Запрашиваемый ресурс не найден' });
   next();
 });
+
+app.use(errors());
+
+app.use((err, req, res, next) => {
+  res.status(500).send({ message: 'На сервере произошла ошибка' });
+  next()
+});
+
+// app.use((err, req, res, next) => {
+//   let details;
+
+//   if (isCelebrateError(err)) {
+//     details = new BadRequestError(err.details.get('body'));
+//   } else {
+//     details = err;
+//   }
+
+//   const { statusCode = 500, message = 'На сервере произошла ошибка' } = details;
+//   res.status(statusCode).send({
+//     message,
+//   });
+//   next();
+// });
 
 app.listen(PORT, () => {
   console.log('privet');
