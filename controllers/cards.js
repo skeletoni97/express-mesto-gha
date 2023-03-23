@@ -31,11 +31,12 @@ module.exports.deleteCards = (req, res) => {
   return Card.findByIdAndRemove(cardId)
     .then((card) => {
       if (!card) {
-        return res.status(404).send({ message: 'Карточка с указанным _id не найдена.' });
-      } if (cardId !== card.owner._id) {
-        return res.status(403).send({ message: 'Недостаточно прав на удаление карточки.' });
+        res.status(404).send({ message: 'Карточка с указанным _id не найдена.' });
+      } if (card.owner._id.toString() !== req.user._id.toString()) {
+        res.status(403).send({ message: 'Недостаточно прав на удаление карточки.' });
+      } else {
+        res.send({ data: card });
       }
-      return res.send({ data: card });
     })
     .catch((err) => res.status(500).send({ message: err.message }));
 };
