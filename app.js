@@ -8,14 +8,21 @@ const cardsRouter = require('./routes/cards');
 
 const { login, createUser } = require('./controllers/users');
 const auth = require('./middlewares/auth');
-const { NotFoundError } = require('./errors/BadRequestError');
+const NotFoundError = require('./errors/NotFoundError');
 
 const { PORT = 3000 } = process.env;
 
 mongoose.connect('mongodb://127.0.0.1:27017/mestodb', {
   useNewUrlParser: true,
   useUnifiedTopology: true,
-});
+})
+  .then(() => {
+    console.log('Connected to MongoDB');
+  })
+  .catch((err) => {
+    console.error('Error connecting to MongoDB:', err);
+    process.exit(1);
+  });
 
 const app = express();
 app.use(bodyParser.json());
@@ -39,8 +46,9 @@ app.post('/signup', celebrate({
 
 app.use('/users', auth, usersRouter);
 app.use('/cards', auth, cardsRouter);
-app.use('*', auth, (req, res, next) => {
-  next(new NotFoundError('Запрашиваемый ресурс не найден.'));
+
+app.use(auth, (err, req, res, next) => {
+  next(new NotFoundError('Страница не найдена'));
 });
 
 app.use(errors());
@@ -49,7 +57,7 @@ app.use((err, req, res, next) => {
   const statusCode = err.statusCode || 500;
   const message = statusCode === 500 ? 'На сервере произошла ошибка.' : err.massage;
   res.status(statusCode).send({ message });
-  next();
+  return next(); // <-- возвращаем вызов next()
 });
 
 app.listen(PORT, () => {

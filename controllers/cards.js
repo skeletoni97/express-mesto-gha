@@ -1,7 +1,9 @@
 const mongoose = require('mongoose');
 
 const { ObjectId } = mongoose.Types;
-const { BadRequestError, NotFoundError, ForbiddenError } = require('../errors/BadRequestError');
+const BadRequestError = require('../errors/BadRequestError');
+const NotFoundError = require('../errors/NotFoundError');
+const ForbiddenError = require('../errors/ForbiddenError');
 const Card = require('../models/card');
 
 module.exports.getCards = (req, res, next) => {

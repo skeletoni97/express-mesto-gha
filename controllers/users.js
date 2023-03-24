@@ -7,12 +7,10 @@ const jwt = require('jsonwebtoken');
 const { ObjectId } = mongoose.Types;
 
 const User = require('../models/user');
-const {
-  BadRequestError,
-  NotFoundError,
-  UnauthorizedError,
-  ConflictError,
-} = require('../errors/BadRequestError');
+const BadRequestError = require('../errors/BadRequestError');
+const NotFoundError = require('../errors/NotFoundError');
+const UnauthorizedError = require('../errors/UnauthorizedError');
+const ConflictError = require('../errors/ConflictError');
 
 module.exports.getUsersMe = (req, res, next) => {
   User.findById({ _id: req.user._id })
@@ -26,12 +24,12 @@ module.exports.login = (req, res, next) => {
   return User.findOne({ email }).select('+password')
     .then((user) => {
       if (!user) {
-        next(new UnauthorizedError('Неправильные пароль или почта,'));
+        next(new UnauthorizedError('Неправильные пароль или почта.'));
       }
       return bcrypt.compare(password, user.password)
         .then((matched) => {
           if (!matched) {
-            next(new UnauthorizedError('Неправильные пароль или почта,'));
+            next(new UnauthorizedError('Неправильные пароль или почта.'));
           }
           const token = jwt.sign({ _id: user._id }, 'some-secret-key', { expiresIn: '7d' });
           res.cookie('jwt', token, { httpOnly: true, sameSite: true });
