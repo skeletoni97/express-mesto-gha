@@ -8,6 +8,10 @@ const cardSchema = new mongoose.Schema({
     maxlength: 30,
   },
   link: {
+    validate: {
+      validator: (v) => /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)/.test(v),
+      message: 'Некорректный URL',
+    },
     type: String,
     required: true,
   },

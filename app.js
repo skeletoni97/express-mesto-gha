@@ -8,6 +8,7 @@ const cardsRouter = require('./routes/cards');
 
 const { login, createUser } = require('./controllers/users');
 const auth = require('./middlewares/auth');
+const { NotFoundError } = require('./errors/BadRequestError');
 
 const { PORT = 3000 } = process.env;
 
@@ -23,7 +24,7 @@ app.post('/signin', celebrate({
   body: Joi.object().keys({
     email: Joi.string().email().required(),
     password: Joi.string().min(8).required(),
-  }).unknown(true),
+  }),
 }), login);
 
 app.post('/signup', celebrate({
@@ -32,21 +33,22 @@ app.post('/signup', celebrate({
     password: Joi.string().min(8).required(),
     name: Joi.string().min(2).max(30),
     about: Joi.string().min(2).max(30),
-    avatar: Joi.string().uri({ scheme: ['http', 'https'] }),
-  }).unknown(true),
+    avatar: Joi.string().pattern(/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)/).required(),
+  }),
 }), createUser);
 
 app.use('/users', auth, usersRouter);
 app.use('/cards', auth, cardsRouter);
-app.use((req, res, next) => {
-  res.status(404).send({ message: 'Запрашиваемый ресурс не найден' });
-  next();
+app.use('*', auth, (req, res, next) => {
+  next(new NotFoundError('Запрашиваемый ресурс не найден.'));
 });
 
 app.use(errors());
 
 app.use((err, req, res, next) => {
-  res.status(500).send({ message: 'На сервере произошла ошибка' });
+  const statusCode = err.statusCode || 500;
+  const message = statusCode === 500 ? 'На сервере произошла ошибка.' : err.massage;
+  res.status(statusCode).send({ message });
   next();
 });
 
