@@ -2,13 +2,14 @@ const express = require('express');
 // const path = require('path');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
-const { celebrate, Joi, errors } = require('celebrate');
+const { celebrate, Joi, errors, isCelebrateError } = require('celebrate');
 const usersRouter = require('./routes/users');
 const cardsRouter = require('./routes/cards');
 
 const { login, createUser } = require('./controllers/users');
 const auth = require('./middlewares/auth');
 const NotFoundError = require('./errors/NotFoundError');
+const BadRequestError = require('./errors/BadRequestError');
 
 const { PORT = 3000 } = process.env;
 
@@ -47,17 +48,26 @@ app.post('/signup', celebrate({
 app.use('/users', auth, usersRouter);
 app.use('/cards', auth, cardsRouter);
 
-app.use(auth, (err, req, res, next) => {
+app.use(auth, (req, res, next) => {
   next(new NotFoundError('Страница не найдена'));
 });
 
 app.use(errors());
 
 app.use((err, req, res, next) => {
-  const statusCode = err.statusCode || 500;
-  const message = statusCode === 500 ? 'На сервере произошла ошибка.' : err.massage;
-  res.status(statusCode).send({ message });
-  return next(); // <-- возвращаем вызов next()
+  let details;
+
+  if (isCelebrateError(err)) {
+    details = new BadRequestError(err.details.get('body'));
+  } else {
+    details = err;
+  }
+
+  const { statusCode = 500, message = 'На сервере произошла ошибка' } = details;
+  res.status(statusCode).send({
+    message,
+  });
+  next();
 });
 
 app.listen(PORT, () => {
