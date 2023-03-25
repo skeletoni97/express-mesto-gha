@@ -20,25 +20,26 @@ module.exports.postCards = (req, res, next) => {
     .catch((err) => {
       if (err.name === 'ValidationError') {
         next(new BadRequestError('Переданы некорректные данные при создании карточки.'));
+      } else {
+        next(err);
       }
-      next(err);
     });
 };
 
 module.exports.deleteCards = (req, res, next) => {
   const { cardId } = req.params;
   if (!ObjectId.isValid(cardId)) {
-    next(new BadRequestError('Передан некорректный _id карточки.'));
+    return next(new BadRequestError('Передан некорректный _id карточки.'));
   }
   return Card.findById(cardId)
     .then((card) => {
       if (!card) {
-        next(new NotFoundError('Передан несуществующий _id карточки.'));
+        return next(new NotFoundError('Передан несуществующий _id карточки.'));
       }
       if (card.owner._id.toString() !== req.user._id.toString()) {
-        next(new ForbiddenError('Недостаточно прав на удаление карточки.'));
+        return next(new ForbiddenError('Недостаточно прав на удаление карточки.'));
       }
-      card.deleteOne().then(() => res.send({ massage: 'успешно удалена.' }));
+      return card.deleteOne().then(() => res.send({ massage: 'успешно удалена.' }));
     })
     .catch((err) => next(err));
 };
@@ -83,9 +84,9 @@ module.exports.putCardsLike = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        next(new BadRequestError('Передан некорректный _id карточки.'));
+        return next(new BadRequestError('Передан некорректный _id карточки.'));
       }
-      next(err);
+      return next(err);
     });
 };
 
@@ -96,7 +97,7 @@ module.exports.deleteCardsLike = (req, res, next) => {
   return Card.findById(cardId)
     .then((card) => {
       if (!card) {
-        next(new NotFoundError('Передан несуществующий _id карточки.'));
+        return next(new NotFoundError('Передан несуществующий _id карточки.'));
       }
       return Card.findByIdAndUpdate(cardId, { $pull: { likes: userId } }, { new: true })
         .then((updatedCard) => res.send(updatedCard))
@@ -104,8 +105,8 @@ module.exports.deleteCardsLike = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        next(new BadRequestError('Передан некорректный _id карточки.'));
+        return next(new BadRequestError('Передан некорректный _id карточки.'));
       }
-      next(err);
+      return next(err);
     });
 };
